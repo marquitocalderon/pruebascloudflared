@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir Archivo</title>
+  <style>
+    /* Estilos básicos */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h2 {
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    /* Estilo del contenedor */
+    .upload-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 300px;
+    }
+
+    /* Estilos del botón y el input de archivo */
+    .custom-file-upload {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-block;
+      margin-bottom: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    .custom-file-upload:hover {
+      background-color: #0056b3;
+    }
+
+    input[type="file"] {
+      display: none; /* Oculta el input real */
+    }
+
+    .submit-button {
+      background-color: #28a745;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .submit-button:hover {
+      background-color: #218838;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: none;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #000;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin-top: 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Previsualización de la imagen */
+    .preview {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .preview img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #message {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="upload-container">
+    <h2>Subir Archivo</h2>
+    <!-- Vista previa de la imagen -->
+    <div class="preview" id="preview">
+      <p>Selecciona una imagen para ver la vista previa aquí</p>
+    </div>
+    <!-- Formulario de subida -->
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label class="custom-file-upload">
+        <input type="file" name="file" id="fileInput" accept="image/*" required />
+        Elegir archivo
+      </label>
+      <button type="submit" class="submit-button">Subir</button>
+    </form>
+    <!-- Spinner y mensaje de confirmación -->
+    <div class="spinner" id="spinner"></div>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    // Elementos HTML
+    const uploadForm = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('preview');
+    const spinner = document.getElementById('spinner');
+    const message = document.getElementById('message');
+
+    // Mostrar previsualización de la imagen
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          previewContainer.innerHTML = `<img src="${reader.result}" alt="Vista previa de la imagen" />`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewContainer.innerHTML = `<p>Selecciona una imagen para ver la vista previa aquí</p>`;
+      }
+      message.textContent = ''; // Limpiar mensaje previo
+    });
+
+    // Manejar la subida del archivo
+    uploadForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData();
+      const fileField = fileInput.files[0];
+
+      if (!fileField) {
+        message.textContent = 'Por favor, selecciona un archivo antes de subirlo.';
+        return;
+      }
+
+      formData.append('file', fileField);
+
+      // Mostrar spinner y ocultar mensaje
+      spinner.style.display = 'inline-block';
+      message.textContent = '';
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        // Mostrar mensaje de confirmación
+        const responseMessage = await response.text();
+        message.textContent = `Gracias, tu archivo "${fileField.name}" ha sido subido y ahora está en mi PC. gracias estoy comprobando tuneles de red `;
+      } catch (error) {
+        message.textContent = 'Error al subir el archivo';
+      } finally {
+        // Ocultar spinner al final
+        spinner.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
